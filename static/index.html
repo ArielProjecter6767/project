@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080b14"><title>CommonSpace — общайся свободно</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.127/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script>window.CESIUM_BASE_URL='https://cesium.com/downloads/cesiumjs/releases/1.127/Build/Cesium/';</script>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.127/Build/Cesium/Cesium.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <section id="authView" class="auth-wrap">
+    <div class="brand brand-large"><div class="brand-mark"><span></span><span></span><span></span></div><div><b>common<span>space</span></b><small>one room, many worlds</small></div></div>
+    <div class="auth-card glass">
+      <div class="eyebrow">YOUR SPACE TOGETHER</div><h1 id="authTitle">Встречаемся здесь.</h1><p class="muted" id="authSubtitle">Войди в общую комнату — камера и микрофон будут под рукой.</p>
+      <form id="authForm">
+        <label>Никнейм<input id="nickname" minlength="2" maxlength="24" autocomplete="username" placeholder="например, skywalker" required></label>
+        <label>Пароль<input id="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" placeholder="Не менее 8 символов" required></label>
+        <button class="primary-btn full" id="authSubmit">Войти и присоединиться <span>↗</span></button>
+      </form>
+      <p class="auth-switch"><span id="authSwitchText">Впервые здесь?</span> <button id="authSwitch" class="text-btn">Создать аккаунт</button></p>
+      <p id="authError" class="error hidden"></p>
+    </div>
+    <p class="auth-foot">Без лишнего шума. Просто будь на связи.</p>
+  </section>
+
+  <div id="appView" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark"><span></span><span></span><span></span></div><div><b>common<span>space</span></b><small>together, anywhere</small></div></div>
+      <div class="side-label">YOUR SPACE</div>
+      <button class="nav-item active" data-view="call"><span class="nav-icon">◉</span> Общий звонок <span class="live-dot"></span></button>
+      <button class="nav-item" data-view="ai"><span class="nav-icon">✳</span> ИИ-помощник</button>
+      <button class="nav-item" data-view="earth"><span class="nav-icon">◎</span> Земля и погода</button>
+      <div class="sidebar-bottom"><div class="online-card"><span class="live-dot"></span><div><b id="sideCount">0 в комнате</b><small>Общая комната</small></div></div><div class="profile"><div class="avatar" id="profileAvatar">C</div><div class="profile-text"><b id="profileName">Гость</b><small>На связи</small></div><button id="logoutBtn" title="Выйти из аккаунта" class="icon-btn">↪</button></div></div>
+    </aside>
+    <main class="main-area">
+      <header class="topbar"><div class="mobile-brand"><div class="brand-mark"><span></span><span></span><span></span></div><b>common<span>space</span></b></div><div class="breadcrumb"><span>Пространство</span><i>/</i><b id="pageTitle">Общий звонок</b></div><div class="top-actions"><span class="secure-pill"><span class="live-dot"></span> <span id="callStatus">Подключение</span></span><button id="topJoinBtn" class="small-primary hidden">Присоединиться</button></div></header>
+      <section id="callView" class="page-view">
+        <div class="call-heading"><div><div class="eyebrow">OPEN ROOM · EVERYONE WELCOME</div><h1>Просто будь <span>на связи.</span></h1><p class="muted">Общая комната для разговоров, идей и случайных встреч.</p></div><div class="participant-count"><div class="stacked-avatars"><span>✦</span><span>◎</span><span>+</span></div><div><b id="participantCount">0</b><small>сейчас в комнате</small></div></div></div>
+        <div id="callStage" class="call-stage">
+          <div class="stage-top"><span class="stage-live"><span class="live-dot"></span> LIVE ROOM</span><span id="callClock">● AUDIO · VIDEO</span></div>
+          <div id="videoGrid" class="video-grid">
+            <div id="selfTile" class="video-tile self-tile"><video id="localVideo" autoplay muted playsinline></video><div class="video-placeholder" id="selfPlaceholder"><div class="big-avatar">✦</div><b id="selfTileName">Ты</b><small>Камера выключена</small></div><div class="tile-name"><span class="you-dot"></span><span id="selfLabel">Ты</span><small>это вы</small></div><span class="tile-mic" id="selfMicIcon">🎙</span></div>
+            <div id="emptyRoom" class="empty-room"><div class="empty-orbit"><div class="orbit-ring"></div><div class="empty-star">✳</div></div><h3>Твоя комната ждёт</h3><p>Включи микрофон или камеру и позови друзей присоединиться.</p><button id="emptyJoinBtn" class="primary-btn">Присоединиться к звонку <span>↗</span></button></div>
+          </div>
+          <div class="call-controls"><div class="control-group"><button id="micBtn" class="control-btn" title="Включить/выключить микрофон"><span>🎙</span><small>Микрофон</small></button><button id="cameraBtn" class="control-btn" title="Включить/выключить камеру"><span>▣</span><small>Камера</small></button><button id="switchCameraBtn" class="control-btn" title="Переключить камеру"><span>⟳</span><small>Сменить</small></button></div><div class="control-group main-controls"><button id="joinBtn" class="primary-btn"><span class="join-symbol">↗</span> Присоединиться</button><button id="leaveBtn" class="danger-btn hidden"><span>×</span> Выйти из звонка</button></div><div class="control-group"><button id="aiCallBtn" class="control-btn ai-control" title="Позвать ИИ"><span>✳</span><small>Спросить ИИ</small></button><button id="soundBtn" class="control-btn" title="Громкость"><span>◖</span><small>Громкость</small></button></div></div>
+          <div id="volumePanel" class="volume-panel hidden"><b>Громкость собеседников</b><div id="volumeControls" class="volume-controls"></div></div>
+        </div>
+        <div class="call-lower"><div class="lower-card weather-mini"><div class="lower-card-head"><span class="card-icon">☼</span><span>ПОГОДА РЯДОМ</span><button id="locateWeatherBtn" class="text-btn">Моё место ↗</button></div><div id="callWeather" class="weather-inline"><div class="weather-skeleton"></div><div><b>Погода будет здесь</b><small>Разреши геолокацию, чтобы узнать</small></div></div></div><div class="lower-card"><div class="lower-card-head"><span class="card-icon">✧</span><span>МАЛЕНЬКОЕ НАПОМИНАНИЕ</span></div><p class="quote">«Самые хорошие разговоры начинаются с простого привет.»</p></div></div>
+      </section>
+      <section id="aiView" class="page-view hidden">
+        <div class="section-heading"><div><div class="eyebrow">YOUR PERSONAL AI</div><h1>Идеи обретают <span>форму.</span></h1><p class="muted">Спроси, попроси придумать или создай изображение — история останется с тобой.</p></div><button id="clearAiBtn" class="outline-btn">↻ Обновить</button></div>
+        <div class="ai-workspace glass"><div class="ai-intro"><div class="ai-orb-wrap"><canvas id="aiOrb" width="240" height="240"></canvas></div><div><span class="ai-status"><span class="live-dot"></span> AI READY</span><h2>Привет, <span id="aiNickname">друг</span>.</h2><p>Что создадим сегодня?</p></div></div><div id="aiMessages" class="ai-messages"><div class="ai-welcome"><div class="message-orb">✳</div><div><b>Я здесь, чтобы помочь.</b><p>Задай вопрос голосом или текстом. Можем обсудить идею, найти погоду или создать изображение.</p></div></div></div><div id="aiThinking" class="thinking hidden"><span></span><span></span><span></span> Думаю…</div><form id="aiForm" class="ai-composer"><button type="button" id="aiVoiceBtn" class="round-tool" title="Говорить">🎙</button><input id="aiInput" placeholder="Напиши или скажи, что у тебя на уме…" autocomplete="off"><button type="button" id="imageBtn" class="round-tool" title="Создать изображение">▧</button><button type="submit" class="send-btn" aria-label="Отправить">↑</button></form><div class="ai-hints"><button data-prompt="Расскажи интересный факт о космосе">✧ Факт о космосе</button><button data-prompt="Помоги мне придумать красивую идею для изображения">▧ Идея для изображения</button><button data-prompt="Как узнать погоду в нужном месте?">☼ Погода</button></div></div>
+      </section>
+      <section id="earthView" class="page-view hidden">
+        <div class="section-heading earth-heading"><div><div class="eyebrow">PLANET VIEW · LIVE WEATHER</div><h1>Один мир. <span>Тысячи историй.</span></h1><p class="muted">Исследуй рельеф Земли и наблюдай за погодой.</p></div><button id="geoToggle" class="outline-btn">◎ Моя геолокация: выкл.</button></div>
+        <div class="earth-search glass"><span>⌕</span><input id="placeSearch" placeholder="Название места или координаты: 31.77, 35.21"><button id="searchWeatherBtn" class="primary-btn">Найти место ↗</button></div>
+        <div class="globe-shell"><div id="cesiumContainer"></div><div class="globe-top-overlay"><span class="globe-live"><span class="live-dot"></span> EARTH LIVE</span><span id="globeLocation">Глобус готовится…</span></div><div class="globe-bottom-overlay"><div class="globe-caption"><small>ТЕКУЩИЙ СЛОЙ</small><b id="currentLayerLabel">Рельеф и спутник</b></div><div class="globe-legend" id="globeLegend"><span>Низко</span><i></i><span>Высоко</span></div></div><div id="globeLoading" class="globe-loading"><div class="loading-orbit">◎</div><b>Открываем Землю</b><small>Загрузка рельефа Cesium</small></div></div>
+        <div class="layer-selector"><div class="layer-title"><b>Погодные слои</b><small>Выбранный режим сохраняется в профиле</small></div><div class="layer-options"><button class="layer-btn selected" data-layer="normal"><span>🌍</span><b>Рельеф</b></button><button class="layer-btn" data-layer="temperature"><span>🌡</span><b>Температура</b></button><button class="layer-btn" data-layer="precipitation"><span>🌧</span><b>Осадки</b></button><button class="layer-btn" data-layer="wind"><span>〰</span><b>Ветер</b></button><button class="layer-btn" data-layer="pressure"><span>◉</span><b>Давление</b></button><button class="layer-btn" data-layer="clouds"><span>☁</span><b>Облачность</b></button></div><label class="border-toggle"><input id="bordersToggle" type="checkbox" checked> <span class="toggle-track"></span> Границы стран и берегов</label></div>
+        <div id="searchedWeather" class="weather-result glass hidden"></div>
+      </section>
+    </main>
+    <nav class="mobile-nav"><button class="active" data-view="call"><span>◉</span><small>Звонок</small></button><button data-view="ai"><span>✳</span><small>ИИ</small></button><button data-view="earth"><span>◎</span><small>Земля</small></button></nav>
+  </div>
+  <div id="toast" class="toast hidden"></div>
+  <div id="aiVoiceOverlay" class="voice-overlay hidden"><button id="closeVoice" class="voice-close">×</button><div class="voice-particles"><canvas id="voiceOrb" width="520" height="520"></canvas></div><div class="voice-state" id="voiceState">Я слушаю тебя</div><p id="voiceTranscript">Говори свободно. Я отправлю сообщение после паузы.</p><button id="voiceStop" class="voice-stop">■ <span>Завершить и отправить</span></button><small>Нажми на сферу, чтобы остановить запись</small></div>
+  <script src="/static/app.js"></script>
+</body></html>
