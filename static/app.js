@@ -217,7 +217,7 @@ $("#cameraBtn").addEventListener("click", async () => {
   if (!state.localStream) return toast("Сначала присоединись к звонку.");
   const track = state.localStream.getVideoTracks()[0];
   if (!track) {
-    try { const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:state.facingMode}}); const newTrack = stream.getVideoTracks()[0]; state.localStream.addTrack(newTrack); state.peers.forEach(r => { const sender = r.pc.getSenders().find(s => s.track && s.track.kind === "video"); if (sender) sender.replaceTrack(newTrack); else r.pc.addTrack(newTrack,state.localStream); }); state.cameraOn = true; $("#localVideo").srcObject = state.localStream; updateSelfMedia(); }
+    try { const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:state.facingMode}}); const newTrack = stream.getVideoTracks()[0]; state.localStream.addTrack(newTrack); for (const [peerId, r] of state.peers) { const sender = r.pc.getSenders().find(s => s.track && s.track.kind === "video"); if (sender) await sender.replaceTrack(newTrack); else { r.pc.addTrack(newTrack,state.localStream); try { const offer=await r.pc.createOffer(); await r.pc.setLocalDescription(offer); sendSignal(peerId,{description:r.pc.localDescription}); } catch(err) { console.warn("Camera renegotiation failed",err); } } } state.cameraOn = true; $("#localVideo").srcObject = state.localStream; updateSelfMedia(); }
     catch { toast("Не удалось включить камеру. Проверь разрешение браузера."); }
     return;
   }
@@ -397,10 +397,21 @@ async function initGlobe() {
         animation:false,baseLayerPicker:false,geocoder:false,homeButton:false,infoBox:false,
         navigationHelpButton:false,sceneModePicker:false,selectionIndicator:false,timeline:false,
         fullscreenButton:false,shouldAnimate:true,terrainProvider:await Cesium.CesiumTerrainProvider.fromIonAssetId(1),
-        imageryProvider: new Cesium.IonImageryProvider({assetId:2}),
+        imageryProvider: false,
         requestRenderMode:false
       });
       state.viewer=viewer;
+      try {
+        const imagery = await Cesium.IonImageryProvider.fromAssetId(2);
+        viewer.imageryLayers.addImageryProvider(imagery);
+      } catch (imageryError) {
+        console.warn("Cesium imagery unavailable; using a public satellite fallback", imageryError);
+        viewer.imageryLayers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+          url:"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          maximumLevel:19,
+          credit:"© OpenStreetMap contributors"
+        }));
+      }
       viewer.scene.globe.enableLighting=true;
       viewer.scene.globe.showGroundAtmosphere=true;
       viewer.scene.globe.depthTestAgainstTerrain=false;
