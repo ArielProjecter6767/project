@@ -51,6 +51,10 @@ function showApp() {
   $("#profileName").textContent = state.user.nickname; $("#profileAvatar").textContent = state.user.nickname.slice(0,1).toUpperCase();
   $("#selfLabel").textContent = state.user.nickname + " (ты)"; $("#selfTileName").textContent = state.user.nickname;
   $("#aiNickname").textContent = state.user.nickname;
+  if (!sessionStorage.getItem("commonspace_weather_requested")) {
+    sessionStorage.setItem("commonspace_weather_requested", "1");
+    if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => loadLocalWeather(pos.coords.latitude, pos.coords.longitude), () => {}, {timeout:9000, maximumAge:300000});
+  }
 }
 $("#logoutBtn").addEventListener("click", async () => {
   await leaveCall(false);
@@ -453,6 +457,7 @@ $("#geoToggle").addEventListener("click", async()=>{
   if(!state.geolocationEnabled){
     navigator.geolocation.getCurrentPosition(async pos=>{
       state.geolocationEnabled=true;$("#geoToggle").textContent="◎ Моя геолокация: вкл.";
+      api("/api/preferences",{method:"PUT",body:JSON.stringify({globe_mode:state.globeMode,geolocation_enabled:true})}).catch(()=>{});
       const {latitude:lat,longitude:lon}=pos.coords;
       if(state.viewer){
         if(state.geoMarker)state.viewer.entities.remove(state.geoMarker);
@@ -463,6 +468,7 @@ $("#geoToggle").addEventListener("click", async()=>{
     },err=>toast("Не удалось получить геолокацию: "+err.message),{enableHighAccuracy:true,timeout:12000});
   }else{
     state.geolocationEnabled=false;$("#geoToggle").textContent="◎ Моя геолокация: выкл.";
+    api("/api/preferences",{method:"PUT",body:JSON.stringify({globe_mode:state.globeMode,geolocation_enabled:false})}).catch(()=>{});
     if(state.viewer&&state.geoMarker){state.viewer.entities.remove(state.geoMarker);state.geoMarker=null;}
   }
 });
