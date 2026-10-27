@@ -79,6 +79,7 @@ class ImageInput(BaseModel):
 
 class PreferencesInput(BaseModel):
     globe_mode: str = Field(default="normal", max_length=30)
+    geolocation_enabled: Optional[bool] = None
 
 
 class RoomManager:
@@ -372,8 +373,11 @@ async def save_preferences(payload: PreferencesInput, request: Request):
     allowed = {"normal", "temperature", "precipitation", "wind", "pressure", "clouds"}
     if payload.globe_mode not in allowed:
         raise HTTPException(status_code=400, detail="Неизвестный режим Земли.")
-    await require_db().preferences.update_one({"uid": user["_id"]}, {"$set": {"globe_mode": payload.globe_mode, "updated_at": utcnow()}}, upsert=True)
-    return {"ok": True, "globe_mode": payload.globe_mode}
+    changes = {"globe_mode": payload.globe_mode, "updated_at": utcnow()}
+    if payload.geolocation_enabled is not None:
+        changes["geolocation_enabled"] = payload.geolocation_enabled
+    await require_db().preferences.update_one({"uid": user["_id"]}, {"$set": changes}, upsert=True)
+    return {"ok": True, "globe_mode": payload.globe_mode, "geolocation_enabled": changes.get("geolocation_enabled")}
 
 
 @app.websocket("/ws/room")
