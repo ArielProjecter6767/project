@@ -397,10 +397,18 @@ async function initGlobe() {
     try {
       const config=await api("/api/config");
       if (config.cesiumIonToken) Cesium.Ion.defaultAccessToken=config.cesiumIonToken;
+      let terrainProvider;
+      try {
+        terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(1);
+      } catch (terrainError) {
+        console.warn("Cesium terrain unavailable; using ellipsoid fallback", terrainError);
+        terrainProvider = new Cesium.EllipsoidTerrainProvider();
+        toast("Для реального рельефа добавь CESIUM_ION_TOKEN в Render.");
+      }
       const viewer = new Cesium.Viewer("cesiumContainer", {
         animation:false,baseLayerPicker:false,geocoder:false,homeButton:false,infoBox:false,
         navigationHelpButton:false,sceneModePicker:false,selectionIndicator:false,timeline:false,
-        fullscreenButton:false,shouldAnimate:true,terrainProvider:await Cesium.CesiumTerrainProvider.fromIonAssetId(1),
+        fullscreenButton:false,shouldAnimate:true,terrainProvider,
         imageryProvider: false,
         requestRenderMode:false
       });
@@ -446,7 +454,7 @@ function applyGlobeLayer(layer) {
       credit:"Weather tiles © OpenWeather"
     });
     state.weatherLayer=viewer.imageryLayers.addImageryProvider(provider);
-    state.weatherLayer.alpha=0.88;state.weatherLayer.brightness=1.22;state.weatherLayer.contrast=1.18;state.weatherLayer.saturation=1.3;
+    state.weatherLayer.alpha=1;state.weatherLayer.brightness=1.28;state.weatherLayer.contrast=1.42;state.weatherLayer.saturation=1.65;
     $("#globeLegend").classList.remove("hidden");
   } else $("#globeLegend").classList.add("hidden");
 }
